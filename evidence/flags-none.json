@@ -1,0 +1,33 @@
+{
+  "server": {
+    "name": "kubernetes",
+    "version": "4.1.7"
+  },
+  "flags": [],
+  "toolCount": 23,
+  "tools": [
+    "cleanup",
+    "exec_in_pod",
+    "explain_resource",
+    "install_helm_chart",
+    "kubectl_apply",
+    "kubectl_context",
+    "kubectl_create",
+    "kubectl_delete",
+    "kubectl_describe",
+    "kubectl_generic",
+    "kubectl_get",
+    "kubectl_logs",
+    "kubectl_patch",
+    "kubectl_reconnect",
+    "kubectl_rollout",
+    "kubectl_scale",
+    "list_api_resources",
+    "node_management",
+    "ping",
+    "port_forward",
+    "stop_port_forward",
+    "uninstall_helm_chart",
+    "upgrade_helm_chart"
+  ]
+}

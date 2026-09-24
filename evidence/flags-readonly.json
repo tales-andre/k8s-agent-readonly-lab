@@ -1,0 +1,33 @@
+{
+  "server": {
+    "name": "kubernetes",
+    "version": "4.1.7"
+  },
+  "flags": [
+    "ALLOW_ONLY_READONLY_TOOLS=true"
+  ],
+  "toolCount": 8,
+  "tools": [
+    "explain_resource",
+    "kubectl_context",
+    "kubectl_describe",
+    "kubectl_get",
+    "kubectl_logs",
+    "kubectl_reconnect",
+    "list_api_resources",
+    "ping"
+  ],
+  "calls": [
+    {
+      "tool": "kubectl_apply",
+      "arguments": {
+        "manifest": "x",
+        "namespace": "demo"
+      },
+      "response": {
+        "code": -32600,
+        "message": "MCP error -32600: Tool 'kubectl_apply' is not allowed under the current server configuration"
+      }
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "server": {
+    "name": "kubernetes",
+    "version": "4.1.7"
+  },
+  "flags": [],
+  "toolCount": 23,
+  "tools": [
+    "cleanup",
+    "exec_in_pod",
+    "explain_resource",
+    "install_helm_chart",
+    "kubectl_apply",
+    "kubectl_context",
+    "kubectl_create",
+    "kubectl_delete",
+    "kubectl_describe",
+    "kubectl_generic",
+    "kubectl_get",
+    "kubectl_logs",
+    "kubectl_patch",
+    "kubectl_reconnect",
+    "kubectl_rollout",
+    "kubectl_scale",
+    "list_api_resources",
+    "node_management",
+    "ping",
+    "port_forward",
+    "stop_port_forward",
+    "uninstall_helm_chart",
+    "upgrade_helm_chart"
+  ],
+  "calls": [
+    {
+      "tool": "kubectl_get",
+      "arguments": {
+        "resourceType": "pods",
+        "namespace": "demo"
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"items\": [\n    {\n      \"name\": \"web-67b58cf4fb-wxwgr\",\n      \"namespace\": \"demo\",\n      \"kind\": \"Pod\",\n      \"status\": \"Running\",\n      \"createdAt\": \"2026-09-24T00:00:30Z\"\n    }\n  ]\n}"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "kubectl_apply",
+      "arguments": {
+        "manifest": "apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: written-by-agent\n  namespace: demo\ndata:\n  hello: world\n",
+        "namespace": "demo"
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "configmap/written-by-agent created\n"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "kubectl_scale",
+      "arguments": {
+        "name": "web",
+        "namespace": "demo",
+        "replicas": 2,
+        "resourceType": "deployment"
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"success\":true,\"message\":\"Scaled deployment web to 2 replicas\"}"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "kubectl_patch",
+      "arguments": {
+        "resourceType": "deployment",
+        "name": "web",
+        "namespace": "demo",
+        "patchType": "merge",
+        "patchData": {
+          "metadata": {
+            "labels": {
+              "patched-by": "agent"
+            }
+          }
+        }
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "deployment.apps/web patched\n"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "exec_in_pod",
+      "arguments": {
+        "name": "web-67b58cf4fb-wxwgr",
+        "namespace": "demo",
+        "command": [
+          "cat",
+          "/etc/hostname"
+        ]
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "web-67b58cf4fb-wxwgr\n"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "kubectl_delete",
+      "arguments": {
+        "resourceType": "configmap",
+        "name": "written-by-agent",
+        "namespace": "demo"
+      },
+      "response": {
+        "content": [
+          {
+            "type": "text",
+            "text": "configmap \"written-by-agent\" deleted from demo namespace\n"
+          }
+        ]
+      }
+    }
+  ]
+}

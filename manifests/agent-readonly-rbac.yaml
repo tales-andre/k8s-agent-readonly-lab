@@ -1,0 +1,26 @@
+# Layer 1: the identity the AI agent runs as.
+# Bound to the built-in "view" ClusterRole: get/list/watch on most resources,
+# no secrets, no pods/exec, no create/update/patch/delete.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-agent-readonly
+  namespace: agent-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ai-agent-readonly-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: ai-agent-readonly
+    namespace: agent-system

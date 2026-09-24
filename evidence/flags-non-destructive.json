@@ -1,0 +1,44 @@
+{
+  "server": {
+    "name": "kubernetes",
+    "version": "4.1.7"
+  },
+  "flags": [
+    "ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS=true"
+  ],
+  "toolCount": 18,
+  "tools": [
+    "exec_in_pod",
+    "explain_resource",
+    "install_helm_chart",
+    "kubectl_apply",
+    "kubectl_context",
+    "kubectl_create",
+    "kubectl_describe",
+    "kubectl_get",
+    "kubectl_logs",
+    "kubectl_patch",
+    "kubectl_reconnect",
+    "kubectl_rollout",
+    "kubectl_scale",
+    "list_api_resources",
+    "ping",
+    "port_forward",
+    "stop_port_forward",
+    "upgrade_helm_chart"
+  ],
+  "calls": [
+    {
+      "tool": "kubectl_delete",
+      "arguments": {
+        "resourceType": "pod",
+        "name": "does-not-exist",
+        "namespace": "default"
+      },
+      "response": {
+        "code": -32600,
+        "message": "MCP error -32600: Tool 'kubectl_delete' is not allowed under the current server configuration"
+      }
+    }
+  ]
+}
