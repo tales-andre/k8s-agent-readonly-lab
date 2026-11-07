@@ -1,0 +1,55 @@
+name: lab
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint and check committed evidence
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
+      - name: yamllint
+        run: pipx run --spec yamllint==1.38.0 yamllint --strict .
+      - name: Committed evidence matches the README
+        run: bash scripts/check-evidence.sh
+
+  lab:
+    name: Re-run the flag checks and the RBAC test on kind
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install kind (the RBAC script creates its own cluster)
+        uses: helm/kind-action@v1.15.2
+        with:
+          version: v0.33.0
+          install_only: true
+      - name: What each flag exposes (no cluster needed)
+        run: |
+          node scripts/mcp-tools.mjs 4.1.7 > evidence/flags-none.json
+          node scripts/mcp-tools.mjs 4.1.7 --flag ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS=true --call kubectl_delete > evidence/flags-non-destructive.json
+          node scripts/mcp-tools.mjs 4.1.7 --flag ALLOW_ONLY_READONLY_TOOLS=true --call kubectl_apply > evidence/flags-readonly.json
+      - name: RBAC test (throwaway kind cluster)
+        run: bash scripts/rbac-test.sh 4.1.7
+      - name: Fresh evidence matches the README
+        run: bash scripts/check-evidence.sh
+      - name: Keep the raw output
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: evidence
+          path: evidence/
+          if-no-files-found: error

@@ -1,5 +1,7 @@
 # k8s-agent-readonly-lab
 
+[![lab](https://github.com/tales-andre/k8s-agent-readonly-lab/actions/workflows/lab.yml/badge.svg)](https://github.com/tales-andre/k8s-agent-readonly-lab/actions/workflows/lab.yml)
+
 What actually stops an AI agent from changing your Kubernetes cluster?
 
 This lab tests three layers of control on [mcp-server-kubernetes](https://github.com/Flux159/mcp-server-kubernetes)
@@ -71,13 +73,10 @@ API server rejected every write from the `view` account.
 
 ## 4. And the prompt?
 
-Instructions shape behavior; they don't remove capability. In an earlier lab (2 incidents, each triaged
-once with and once without a written triage runbook for the agent), the agent found the same root cause
-both times, 23–36% faster with the runbook, and used zero write actions with it. Without the runbook it
-ran `kubectl exec` inside a container to measure memory. It was careful and stayed in staging, but
-nothing in its permissions would have stopped it in production. n=2 is a signal, not a benchmark.
-Raw data (in Portuguese):
-[tales-andre/pos-aiops · comparacao-com-e-sem-skill.md](https://github.com/tales-andre/pos-aiops/blob/master/desafio-03/ticket-02-triagem-no-cluster/execucoes/comparacao-com-e-sem-skill.md).
+Instructions shape behavior; they don't remove capability. A runbook or a system prompt can make an
+agent more predictable, but if its identity is allowed to write, the prompt is the only thing between
+the agent and a change. This lab does not measure prompt effects. Its point is narrower: RBAC is the
+only layer the Kubernetes API server enforces.
 
 ## Takeaways
 
@@ -87,12 +86,12 @@ Raw data (in Portuguese):
    is read-only. `ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS` is not.
 3. **Pin the server version.** `npx -y mcp-server-kubernetes` without a version pulls whatever is latest,
    which could be a version where the filter doesn't hold.
-4. **Treat prompts and runbooks as behavior.** They make the agent predictable and faster, but they are
+4. **Treat prompts and runbooks as behavior.** They can make the agent more predictable, but they are
    not a security control.
 
 ## Reproduce
 
-Requirements: Node.js 18+, and for the RBAC test Docker, kind and kubectl.
+Requirements: Node.js 18+, for the RBAC test Docker, kind and kubectl, and jq for the evidence check.
 
 ```bash
 # What each flag exposes (no cluster needed)
@@ -102,6 +101,9 @@ node scripts/mcp-tools.mjs 4.1.7 --flag ALLOW_ONLY_READONLY_TOOLS=true --call ku
 
 # RBAC test (creates and deletes a kind cluster named readonly-lab)
 bash scripts/rbac-test.sh 4.1.7
+
+# Check that evidence/ still says what the tables above say
+bash scripts/check-evidence.sh
 ```
 
 ## Limits
@@ -111,3 +113,13 @@ bash scripts/rbac-test.sh 4.1.7
   production, scope the agent to the namespaces and resources it actually needs.
 - This lab tests capability, not intent. It doesn't evaluate prompt injection or what an agent would
   *choose* to do.
+- Everything runs locally: the flag checks need no cluster, and the RBAC test uses a throwaway kind
+  cluster. Nothing here ran against a cloud account or a managed Kubernetes service.
+- The [`lab`](./.github/workflows/lab.yml) workflow re-runs both tests on a GitHub-hosted runner (fresh
+  kind cluster, kind v0.33.0 with its default Kubernetes v1.37 node) on every push, checks the results
+  against the tables above and keeps the raw output as a run artifact. The date of the latest run is on
+  the [Actions page](https://github.com/tales-andre/k8s-agent-readonly-lab/actions/workflows/lab.yml).
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
