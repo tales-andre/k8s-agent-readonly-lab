@@ -38,11 +38,11 @@ check "view ServiceAccount: all 23 tools exposed" rbac-as-view-serviceaccount.js
   '.toolCount == 23 and (.calls | length) == 6'
 check "view ServiceAccount: kubectl_get allowed" rbac-as-view-serviceaccount.json \
   '.calls[0].tool == "kubectl_get" and (.calls[0].response | has("code") | not)
-   and (.calls[0].response | tostring | test("Forbidden") | not)'
+   and (.calls[0].response | tostring | test("forbidden"; "i") | not)'
 check "view ServiceAccount: the 5 writes are Forbidden" rbac-as-view-serviceaccount.json \
-  '[.calls[1:][] | .response | tostring | test("Forbidden")] | length == 5 and all'
+  '[.calls[1:][] | .response | tostring | test("forbidden"; "i")] | length == 5 and all'
 check "cluster-admin: all 6 calls succeed" rbac-as-cluster-admin.json \
-  '[.calls[] | .response | has("code") or (tostring | test("Forbidden|success.{0,4}false"))]
+  '[.calls[] | .response | has("code") or (tostring | test("forbidden|success.{0,4}false"; "i"))]
    | length == 6 and (any | not)'
 
 if [ "$failed" -ne 0 ]; then
